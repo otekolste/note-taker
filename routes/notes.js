@@ -3,8 +3,11 @@ const fs = require('fs');
 const { v4: uuidv4 } = require('uuid');
 const util = require('util');
 
+const dbPath = './db/db.json'
+
+
 notes.get('/', (req,res) => {
-    fs.readFile('./db/db.json','utf8', (err, data) => {
+    fs.readFile(dbPath,'utf8', (err, data) => {
         if(err) {console.error(err)}
         else {
             try {
@@ -26,11 +29,11 @@ notes.post('/', (req,res) => {
         const newNote = {
             title,
             text,
-            noteID: uuidv4(),
+            id: uuidv4(),
         };
     console.log(newNote);
     console.log(JSON.stringify(newNote));
-    fs.readFile('./db/db.json', 'utf8', (err,data) => {
+    fs.readFile(dbPath, 'utf8', (err,data) => {
         if(err) {console.error(err)}
         else {
             let notesArray;
@@ -54,5 +57,20 @@ notes.post('/', (req,res) => {
 
 })
 
+notes.delete('/:id', (req,res) => {
+    fs.readFile(dbPath, 'utf8', (err,data) => {
+        if(err) {console.error(err)}
+        else {
+            let notesArray = JSON.parse(data);
+            let noteIndex = notesArray.findIndex((element) => element.id == req.params.id);
+            console.log(`id: ${req.params.id}`);
+            if(noteIndex != -1) {notesArray.splice(noteIndex, 1);}
+            fs.writeFile(dbPath, JSON.stringify(notesArray), (err) => err ? console.error(err) : res.json('Successfully deleted note.'));
+        }
+
+
+    })
+
+})
 
 module.exports = notes;
